@@ -28,9 +28,11 @@ This project demonstrates a SAS macro for automating linear regression analysis.
 ### 2. Demographics Clinical Study Report (CSR)
 
 **Project Overview:**
+
 This project demonstrates how to create a mock demographics table for a clinical study report (CSR) with raw data from case report forms(CRF). The report summarizes key demographic characteristics (e.g., age, gender, race) by treatment groups (Placebo, Active Treatment, All Patients). The final report includes formatted demographics table and raw data previews. This project was completed as part of the Udemy course The Simplest Guide to Clinical Trials Data Analysis with SAS, and the raw data is sourced from the course materials.
 
 **Repository Structure:**
+
 * `code/`: Contains SAS scripts for deriving key variables, generating summary statistics, and creating formatted reports.
 * `data/`: Includes raw data from case report forms(CRF).
 * `output/`: Generated reports in PDF, showing the structure of the original dataset and the generated demographics table. 
