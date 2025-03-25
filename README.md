@@ -1,5 +1,3 @@
-# SAS_Projects
-
 This repository showcases my SAS programming skills through a collection of mini projects, including macros and code examples for different types of statistical analyses.
 
 ## Current Projects
