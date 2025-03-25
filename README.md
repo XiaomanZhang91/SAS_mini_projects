@@ -1,6 +1,6 @@
 # SAS_Projects
 
-This repository is a showcase of my SAS programming skills, featuring a collection of SAS macros and code examples for various statistical analysis projects.
+This repository showcases my SAS programming skills through a collection of mini projects, including macros and code examples for different types of statistical analyses.
 
 ## Current Projects
 
@@ -37,10 +37,5 @@ This project demonstrates how to create a mock demographics table for a clinical
 * `data/`: Includes raw data from case report forms(CRF).
 * `output/`: Generated reports in PDF, showing the structure of the original dataset and the generated demographics table. 
 
-
-## Future Projects
-
-* **Survival Analysis:**  This project will feature SAS macros for survival analysis, including Kaplan-Meier curves and Cox proportional hazards models.
-* **Longitudinal Data Analysis:** This project will showcase SAS code for analyzing longitudinal data using techniques like mixed models and generalized estimating equations (GEEs).
 
 **Stay tuned for updates!**
