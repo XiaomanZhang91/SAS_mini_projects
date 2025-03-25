@@ -35,5 +35,7 @@ This project demonstrates how to create a mock demographics table for a clinical
 * `data/`: Includes raw data from case report forms(CRF).
 * `output/`: Generated reports in PDF, showing the structure of the original dataset and the generated demographics table. 
 
+## Future Projects
+* **Longitudinal Data Analysis:** This project will showcase SAS code for analyzing longitudinal data using generalized estimating equations (GEEs).
 
 **Stay tuned for updates!**
