@@ -27,15 +27,27 @@ This project demonstrates a SAS macro for automating linear regression analysis.
 
 **Project Overview:**
 
-This project demonstrates how to create a mock demographics table for a clinical study report (CSR) with raw data from case report forms(CRF). The report summarizes key demographic characteristics (e.g., age, gender, race) by treatment groups (Placebo, Active Treatment, All Patients). The final report includes formatted demographics table and raw data previews. This project was completed as part of the Udemy course The Simplest Guide to Clinical Trials Data Analysis with SAS, and the raw data is sourced from the course materials.
+This project demonstrates how to generate a mock demographics table (Table 1.1) for a clinical study report (CSR) based on raw case report form (CRF) data. It walks through the process of transforming raw input into CDISC SDTM-compliant format, calculating key demographic summaries (age, gender, race), and generating a publication-ready table stratified by treatment groups (Placebo, Drug A, and All Patients). 
+
+This project was completed as part of the Udemy course *The Simplest Guide to Clinical Trials Data Analysis with SAS*, using data provided in the course materials.
+
+**Key Features:**
+
+- Converts raw demographics data to CDISC-compliant SDTM `DM` domain format
+- Derives subject-level identifiers (`USUBJID`, `SITEID`, `AGE`, `SEX`, `RACE`, `ETHNIC`) using CDISC/FDA terminology
+- Generates age summaries (mean, SD, min, max) and stratified frequency distributions for categorical age groups, sex, and race
+- Constructs a formatted Table 1.1 in PDF using `PROC REPORT`, ready for CSR or SAP documentation
 
 **Repository Structure:**
 
-* `code/`: Contains SAS scripts for deriving key variables, generating summary statistics, and creating formatted reports.
-* `data/`: Includes raw data from case report forms(CRF).
-* `output/`: Generated reports in PDF, showing the structure of the original dataset and the generated demographics table. 
+- `code/`: SAS programs for importing raw data, transforming into SDTM format, summarizing demographics, and generating reports
+- `data/`: Includes raw mock case report form (CRF) data used for demonstration
+- `output/`: Contains generated PDF reports, including previews of raw data, CDISC-compliant data and the final Table 1.1.
 
 ## Future Projects
 * **Longitudinal Data Analysis:** This project will showcase SAS code for analyzing longitudinal data using generalized estimating equations (GEEs).
 
 **Stay tuned for updates!**
+
+
+

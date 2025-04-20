@@ -1,7 +1,7 @@
 /* Create the Demographics Clinical Study Report (CSR) as shown below 
-as a “mock table” in the Statistical Analysis Plan (SAP). */
+as a mock table in the Statistical Analysis Plan (SAP). */
 
-/*--------------------------------------- 1. Import Data --------------------------------------- */
+/*====================== 1. Import Raw Demographics Data ======================*/
 FILENAME REFFILE '/home/u63463818/Clinical trial data analysis with SAS_Udemy/finalProject_demog.xlsx';
 
 PROC IMPORT DATAFILE=REFFILE
@@ -17,9 +17,93 @@ RUN;
 PROC PRINT DATA=demog; /* Check sample size and missing data */
 RUN;
 
+/*================== 2. Convert to SDTM-Compatible Format ====================*/
+/* HEML-01 to HEML01 */
+PROC SQL;
+	SELECT DISTINCT STUDY
+	FROM demog;
+QUIT;
+DATA sdtm_dm;
+	SET demog;
+	STUDYID = "HEML01";
+	DOMAIN = "DM";
+	RENAME RACE = RACE0;
+RUN;
 
-/*------------------------ 2. Summary Stat for Age, Age Groups, Gender and Race ---------------------- */
-/************************* 2.1 Summary Stat for Age and Age Groups ***********************/
+DATA sdtm_dm;
+	SET sdtm_dm;
+	/* Create SDTM standard variables */
+	USUBJID = CATX('-', STUDYID, PUT(SITENO, Z3.), PUT(PATNO, Z3.));
+	SITEID = SITENO;
+	SUBJID = PATNO;
+
+	/* Recode GENDER to CDISC terminology */
+	IF GENDER = 1 THEN SEX = "M";
+	ELSE IF GENDER = 2 THEN SEX = "F";
+
+	/* Recode RACE to CDISC terminology */
+	SELECT (race0);
+        WHEN (1) DO;
+            RACE = "WHITE";
+            ETHNIC = "NOT HISPANIC OR LATINO";
+        END;
+        WHEN (2) DO;
+            RACE = "BLACK OR AFRICAN AMERICAN";
+            ETHNIC = "NOT HISPANIC OR LATINO";
+        END;
+        WHEN (3) DO;
+            RACE = "WHITE"; /* Assume hispanic are white, given limited information */
+            ETHNIC = "HISPANIC OR LATINO";
+        END;
+        WHEN (4) DO;
+            RACE = "ASIAN";
+            ETHNIC = "NOT HISPANIC OR LATINO";
+        END;
+        WHEN (5) DO;
+            RACE = "OTHER";
+            ETHNIC = "NOT HISPANIC OR LATINO";
+        END;
+        OTHERWISE DO;
+            RACE = "UNKNOWN";
+            ETHNIC = "UNKNOWN";
+        END;
+    END;
+	
+	/* Construct BRTHDTC from separate fields */
+	BRTHDTC_RAW = CATX('/', MONTH, DAY, YEAR);
+	BRTHDTC = INPUT(BRTHDTC_RAW, MMDDYY10.);
+	FORMAT BRTHDTC yymmdd10.;
+
+	/* Convert DIAGDT to proper date format */
+	FORMAT DIAGDT yymmdd10.;
+
+	/* Calculate AGE */
+	AGE = INT((DIAGDT - BRTHDTC) / 365.25);
+	AGEU = "YEARS";
+
+	/* Treatment Grouping */
+	IF TRT = 0 THEN DO;
+		ARMCD = "P";
+		ARM = "Placebo";
+	END;
+	ELSE IF TRT = 1 THEN DO;
+		ARMCD = "A";
+		ARM = "Drug A";
+	END;
+
+	/* Keep only SDTM-relevant variables */
+	KEEP STUDYID DOMAIN USUBJID SITEID SUBJID SEX RACE ETHNIC BRTHDTC AGE AGEU ARMCD ARM;
+RUN;
+
+/*========= 3. Summary Statistics: Age, Gender, Race (CSR Table 1.1) =========*/
+/*
+   Derive numeric and categorical summaries of baseline variables by treatment group:
+   - Includes mean/SD/min/max for age
+   - Frequency distributions for age groups, sex, and race
+   - Outputs intermediate tables for stacking
+*/
+
+/*------------ 3.1 Summary Stats for Age (Continuous and Categorical) -----------*/
 DATA demog1 REPLACE;
 	SET demog;
 	dob = INPUT(COMPRESS(CAT(month, '/', day, '/', year)), mmddyy10.);
@@ -68,7 +152,7 @@ RUN;
 PROC PRINT DATA=agecstats;
 RUN;
 
-/************************* 2.2 Summary Stat for Gender ***********************/
+/*------------------------ 3.2 Summary Stats for Gender -------------------------*/
 PROC FORMAT;
 	VALUE genfmt
 	1 = 'Male'
@@ -87,7 +171,7 @@ DATA genderstats;
 	value = CAT(count, " (", STRIP(PUT(ROUND(pct_row,.1), 8.1)), "%)");
 RUN;
 
-/************************* 2.3 Summary Stat for Race ***********************/
+/*------------------------ 3.3 Summary Stats for Race ---------------------------*/
 PROC FORMAT;
 	VALUE racefmt
 	1 = 'White' 
@@ -112,7 +196,11 @@ DATA racestats;
 	value = CAT(count, " (", STRIP(PUT(ROUND(pct_row, .1),8.1)), "%)");
 RUN;
 
-/* --------------------------- 3. Stack Four Summary Stats Together ----------------------------------- */	
+/*================= 4. Combine and Transpose All Summary Tables =================*/
+/*
+   Combine the summary stats for age, gender, and race.
+   Assign a reporting structure (ord, subord) and format them for CSR presentation.
+*/
 * Check variable types and length;
 PROC CONTENTS DATA= agestats;
 RUN; 
@@ -161,7 +249,7 @@ DATA genderstats1;
 	KEEP ord subord trt stat value;
 RUN;
 
-** - Race;
+* - Race;
 DATA racestats1;
 	LENGTH trt 8 stat $16 value $16;
 	SET racestats;
@@ -188,7 +276,11 @@ PROC TRANSPOSE DATA=allstats OUT=t_allstats PREFIX=trt_;
 	BY ord subord stat;
 RUN;
 
-/*-------------------------------- 4. Construct the Final Report --------------------------------- */	
+/*======================== 5. Generate Final PDF Report =========================*/
+/*
+   Output Table 1.1 (Demographics and Baseline Characteristics by Treatment Group)
+   to a formatted PDF using PROC REPORT. Display counts and percentages by treatment arm.
+*/
 DATA final REPLACE;
 	SET t_allstats;
 	BY ord subord;
@@ -224,6 +316,10 @@ TITLE 'Raw Data Preview';
 PROC PRINT DATA=demog(OBS=10) NOOBS;
 RUN;
 
+TITLE 'Preview of SDTM-Compliant Demographics Dataset (DM Domain)';
+PROC PRINT DATA=sdtm_dm(OBS=10) NOOBS;
+RUN;
+
 TITLE 'Table 1.1';
 TITLE2 'Demographic and Baseline Characteristics by Treatment Group';
 TITLE3 'Randomized Population';
@@ -235,7 +331,7 @@ PROC REPORT DATA=final split='|';
 	DEFINE SUBORD/ NOPRINT ORDER;
 	DEFINE stat/ DISPLAY WIDTH=50 "";
 	DEFINE trt_0/ DISPLAY WIDTH=30 "Placebo|(N=&placebo)";
-	DEFINE trt_1/ DISPLAY WIDTH=30 "Active Treatment|(N=&active)";
+	DEFINE trt_1/ DISPLAY WIDTH=30 "Drug A|(N=&active)";
 	DEFINE trt_2/ DISPLAY WIDTH=30 "All patiens|(N=&total)";
 RUN;
 	
