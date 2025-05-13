@@ -2,7 +2,7 @@ This repository showcases my SAS programming skills through a collection of mini
 
 ## Current Projects
 
-### 2. Demographics Clinical Study Report (CSR)
+### 1. Demographics Clinical Study Report (CSR)
 
 **Project Overview:**
 
